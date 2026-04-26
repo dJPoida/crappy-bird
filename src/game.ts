@@ -252,69 +252,111 @@ export class FlappyGame {
     this.drawGround()
     this.drawBird()
     this.drawOverlay()
+    this.drawPlateTexture()
   }
 
   private drawSky() {
     const gradient = this.ctx.createLinearGradient(0, 0, 0, WORLD_HEIGHT)
-    gradient.addColorStop(0, '#89d4ff')
-    gradient.addColorStop(0.45, '#c6f2ff')
-    gradient.addColorStop(1, '#f7dba7')
+    gradient.addColorStop(0, '#efdcb8')
+    gradient.addColorStop(0.45, '#d2b07d')
+    gradient.addColorStop(1, '#8a5f39')
     this.ctx.fillStyle = gradient
     this.ctx.fillRect(0, 0, WORLD_WIDTH, WORLD_HEIGHT)
 
-    this.ctx.fillStyle = 'rgba(255, 244, 189, 0.88)'
+    this.ctx.fillStyle = 'rgba(252, 234, 191, 0.38)'
     this.ctx.beginPath()
-    this.ctx.arc(WORLD_WIDTH - 72, 94, 38, 0, Math.PI * 2)
+    this.ctx.arc(WORLD_WIDTH - 84, 106, 54, 0, Math.PI * 2)
     this.ctx.fill()
+
+    this.ctx.fillStyle = 'rgba(95, 60, 31, 0.1)'
+    this.ctx.fillRect(0, 0, WORLD_WIDTH, WORLD_HEIGHT)
   }
 
   private drawBackdrop() {
     const ctx = this.ctx
-    const wave = Math.sin(this.elapsed * 0.5) * 6
+    const haze = Math.sin(this.elapsed * 0.35) * 5
 
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.46)'
-    this.drawCloud(78, 110 + wave * 0.2, 0.8)
-    this.drawCloud(292, 154 - wave * 0.1, 0.65)
-    this.drawCloud(220, 86 + wave * 0.15, 0.55)
+    ctx.fillStyle = 'rgba(245, 229, 198, 0.2)'
+    ctx.fillRect(0, 148 + haze, WORLD_WIDTH, 48)
 
-    ctx.fillStyle = '#5f99b1'
+    ctx.fillStyle = '#7d5a3a'
     ctx.beginPath()
-    ctx.moveTo(0, WORLD_HEIGHT - 214)
-    ctx.quadraticCurveTo(96, WORLD_HEIGHT - 274, 184, WORLD_HEIGHT - 206)
-    ctx.quadraticCurveTo(264, WORLD_HEIGHT - 142, 420, WORLD_HEIGHT - 222)
+    ctx.moveTo(0, WORLD_HEIGHT - 286)
+    ctx.lineTo(36, WORLD_HEIGHT - 308)
+    ctx.lineTo(78, WORLD_HEIGHT - 258)
+    ctx.lineTo(130, WORLD_HEIGHT - 318)
+    ctx.lineTo(196, WORLD_HEIGHT - 248)
+    ctx.lineTo(254, WORLD_HEIGHT - 296)
+    ctx.lineTo(316, WORLD_HEIGHT - 244)
+    ctx.lineTo(420, WORLD_HEIGHT - 292)
+    ctx.lineTo(WORLD_WIDTH, WORLD_HEIGHT - 190)
+    ctx.lineTo(0, WORLD_HEIGHT - 202)
+    ctx.closePath()
+    ctx.fill()
+
+    ctx.fillStyle = '#5f4229'
+    ctx.beginPath()
+    ctx.moveTo(0, WORLD_HEIGHT - 230)
+    ctx.quadraticCurveTo(62, WORLD_HEIGHT - 278, 118, WORLD_HEIGHT - 214)
+    ctx.quadraticCurveTo(172, WORLD_HEIGHT - 176, 226, WORLD_HEIGHT - 226)
+    ctx.quadraticCurveTo(284, WORLD_HEIGHT - 274, 334, WORLD_HEIGHT - 214)
+    ctx.quadraticCurveTo(378, WORLD_HEIGHT - 180, 420, WORLD_HEIGHT - 210)
     ctx.lineTo(WORLD_WIDTH, WORLD_HEIGHT - GROUND_HEIGHT)
     ctx.lineTo(0, WORLD_HEIGHT - GROUND_HEIGHT)
     ctx.closePath()
     ctx.fill()
 
-    ctx.fillStyle = '#2f6274'
-    ctx.fillRect(28, WORLD_HEIGHT - 210, 28, 100)
-    ctx.fillRect(70, WORLD_HEIGHT - 232, 34, 122)
-    ctx.fillRect(112, WORLD_HEIGHT - 198, 42, 88)
-    ctx.fillRect(165, WORLD_HEIGHT - 252, 32, 142)
-    ctx.fillRect(206, WORLD_HEIGHT - 222, 36, 112)
-    ctx.fillRect(258, WORLD_HEIGHT - 242, 48, 132)
-    ctx.fillRect(316, WORLD_HEIGHT - 206, 30, 96)
-    ctx.fillRect(356, WORLD_HEIGHT - 260, 38, 150)
+    this.drawTown()
+    this.drawTelegraphPole(56, WORLD_HEIGHT - 198, 68)
+    this.drawTelegraphPole(338, WORLD_HEIGHT - 186, 56)
+    this.drawCactus(92, WORLD_HEIGHT - GROUND_HEIGHT - 2, 0.95)
+    this.drawCactus(356, WORLD_HEIGHT - GROUND_HEIGHT + 8, 0.72)
+  }
 
-    ctx.fillStyle = '#ffe49a'
-    for (let index = 0; index < 18; index += 1) {
-      const x = 36 + (index % 9) * 42
-      const row = Math.floor(index / 9)
-      const y = WORLD_HEIGHT - 190 - row * 34
-      ctx.fillRect(x, y, 8, 10)
-      ctx.fillRect(x + 14, y, 8, 10)
+  private drawTown() {
+    const ctx = this.ctx
+    const baseY = WORLD_HEIGHT - GROUND_HEIGHT
+
+    ctx.fillStyle = '#4d311d'
+    ctx.fillRect(34, baseY - 64, 44, 64)
+    ctx.fillRect(86, baseY - 52, 54, 52)
+    ctx.fillRect(150, baseY - 72, 58, 72)
+    ctx.fillRect(216, baseY - 48, 48, 48)
+    ctx.fillRect(274, baseY - 66, 56, 66)
+
+    ctx.fillRect(28, baseY - 70, 56, 8)
+    ctx.fillRect(82, baseY - 58, 62, 6)
+    ctx.fillRect(144, baseY - 78, 70, 8)
+    ctx.fillRect(268, baseY - 72, 68, 8)
+
+    ctx.fillStyle = '#d9ba85'
+    for (let index = 0; index < 9; index += 1) {
+      const x = 42 + index * 32
+      const y = index % 2 === 0 ? baseY - 42 : baseY - 30
+      ctx.fillRect(x, y, 9, 12)
     }
   }
 
-  private drawCloud(x: number, y: number, scale: number) {
+  private drawTelegraphPole(x: number, y: number, height: number) {
     const ctx = this.ctx
+    ctx.fillStyle = '#4f3420'
+    ctx.fillRect(x, y - height, 6, height)
+    ctx.fillRect(x - 10, y - height + 12, 26, 5)
+    ctx.strokeStyle = 'rgba(69, 43, 25, 0.8)'
+    ctx.lineWidth = 1.5
     ctx.beginPath()
-    ctx.arc(x, y, 22 * scale, 0, Math.PI * 2)
-    ctx.arc(x + 22 * scale, y - 8 * scale, 18 * scale, 0, Math.PI * 2)
-    ctx.arc(x + 46 * scale, y, 24 * scale, 0, Math.PI * 2)
-    ctx.arc(x + 20 * scale, y + 10 * scale, 26 * scale, 0, Math.PI * 2)
-    ctx.fill()
+    ctx.moveTo(x - 10, y - height + 15)
+    ctx.quadraticCurveTo(WORLD_WIDTH / 2, y - height + 28, WORLD_WIDTH + 12, y - height + 18)
+    ctx.stroke()
+  }
+
+  private drawCactus(x: number, baseY: number, scale: number) {
+    const ctx = this.ctx
+    const trunkHeight = 42 * scale
+    ctx.fillStyle = '#6f5835'
+    ctx.fillRect(x, baseY - trunkHeight, 12 * scale, trunkHeight)
+    ctx.fillRect(x - 10 * scale, baseY - trunkHeight + 14 * scale, 9 * scale, 20 * scale)
+    ctx.fillRect(x + 12 * scale, baseY - trunkHeight + 10 * scale, 9 * scale, 18 * scale)
   }
 
   private drawPipes() {
@@ -330,40 +372,57 @@ export class FlappyGame {
 
   private drawPipe(x: number, y: number, width: number, height: number, isTop: boolean) {
     const ctx = this.ctx
-    ctx.fillStyle = '#4fbb4a'
+    ctx.fillStyle = '#7d5835'
     ctx.fillRect(x, y, width, height)
-    ctx.fillStyle = '#2f7d28'
+    ctx.fillStyle = '#5b3d24'
     ctx.fillRect(x + width - 12, y, 12, height)
-    ctx.fillStyle = '#8ce76f'
-    ctx.fillRect(x, y, 10, height)
+    ctx.fillStyle = '#9e7650'
+    ctx.fillRect(x, y, 12, height)
+
+    ctx.fillStyle = 'rgba(244, 220, 185, 0.16)'
+    for (let boardY = y + 16; boardY < y + height; boardY += 28) {
+      ctx.fillRect(x, boardY, width, 3)
+    }
 
     const lipY = isTop ? height - 22 : y
-    ctx.fillStyle = '#61cb54'
+    ctx.fillStyle = '#8c6641'
     ctx.fillRect(x - 6, lipY, width + 12, 22)
-    ctx.fillStyle = '#347b28'
+    ctx.fillStyle = '#4e341f'
     ctx.fillRect(x + width - 6, lipY, 12, 22)
+
+    ctx.fillStyle = '#3f2817'
+    ctx.fillRect(x + 14, lipY + 8, 4, 4)
+    ctx.fillRect(x + width - 20, lipY + 8, 4, 4)
   }
 
   private drawGround() {
     const ctx = this.ctx
     const groundY = WORLD_HEIGHT - GROUND_HEIGHT
 
-    ctx.fillStyle = '#c9a46c'
+    ctx.fillStyle = '#9f7448'
     ctx.fillRect(0, groundY, WORLD_WIDTH, GROUND_HEIGHT)
-    ctx.fillStyle = '#e8c88d'
+    ctx.fillStyle = '#c69b63'
     ctx.fillRect(0, groundY, WORLD_WIDTH, 16)
 
     for (let x = -48 + this.groundOffset; x < WORLD_WIDTH + 48; x += 48) {
-      ctx.fillStyle = '#b98a52'
-      ctx.fillRect(x, groundY + 26, 28, 14)
-      ctx.fillStyle = '#996c37'
-      ctx.fillRect(x + 24, groundY + 52, 28, 14)
+      ctx.fillStyle = 'rgba(132, 88, 49, 0.24)'
+      ctx.fillRect(x, groundY + 28, 34, 10)
+      ctx.fillRect(x + 16, groundY + 62, 30, 10)
     }
 
-    ctx.fillStyle = '#7cbe58'
-    ctx.fillRect(0, groundY - 14, WORLD_WIDTH, 18)
-    ctx.fillStyle = '#4f8b37'
-    ctx.fillRect(0, groundY - 6, WORLD_WIDTH, 6)
+    ctx.strokeStyle = 'rgba(111, 74, 41, 0.55)'
+    ctx.lineWidth = 4
+    ctx.beginPath()
+    ctx.moveTo(46 - this.groundOffset * 0.2, groundY + 18)
+    ctx.quadraticCurveTo(WORLD_WIDTH / 2, groundY + 54, WORLD_WIDTH - 54 - this.groundOffset * 0.2, groundY + 16)
+    ctx.stroke()
+    ctx.beginPath()
+    ctx.moveTo(72 - this.groundOffset * 0.2, groundY + 34)
+    ctx.quadraticCurveTo(WORLD_WIDTH / 2, groundY + 70, WORLD_WIDTH - 30 - this.groundOffset * 0.2, groundY + 30)
+    ctx.stroke()
+
+    ctx.fillStyle = '#6c492c'
+    ctx.fillRect(0, groundY - 14, WORLD_WIDTH, 14)
   }
 
   private drawBird() {
@@ -374,33 +433,33 @@ export class FlappyGame {
     ctx.translate(this.bird.x, this.bird.y)
     ctx.rotate(tilt)
 
-    ctx.fillStyle = '#ffd146'
+    ctx.fillStyle = '#9d7448'
     ctx.beginPath()
     ctx.arc(0, 0, this.bird.radius, 0, Math.PI * 2)
     ctx.fill()
 
-    ctx.fillStyle = '#f09a2f'
+    ctx.fillStyle = '#71492b'
     ctx.beginPath()
-    ctx.ellipse(-4, 6, 14, 9, -0.3, 0, Math.PI * 2)
+    ctx.ellipse(-4, 6, 14, 9, -0.24, 0, Math.PI * 2)
     ctx.fill()
 
     const wingLift = this.state === 'ready' ? Math.sin(this.elapsed * 12) * 5 : -this.bird.velocityY / 85
-    ctx.fillStyle = '#f5b028'
+    ctx.fillStyle = '#c49b67'
     ctx.beginPath()
     ctx.ellipse(-5, 2 + clamp(wingLift, -7, 7), 11, 7, -0.6, 0, Math.PI * 2)
     ctx.fill()
 
-    ctx.fillStyle = '#ffffff'
+    ctx.fillStyle = '#efe3c7'
     ctx.beginPath()
     ctx.arc(7, -6, 5.5, 0, Math.PI * 2)
     ctx.fill()
 
-    ctx.fillStyle = '#1f2937'
+    ctx.fillStyle = '#2e1a0d'
     ctx.beginPath()
     ctx.arc(9, -6, 2.2, 0, Math.PI * 2)
     ctx.fill()
 
-    ctx.fillStyle = '#ef6a39'
+    ctx.fillStyle = '#5f351a'
     ctx.beginPath()
     ctx.moveTo(16, 1)
     ctx.lineTo(28, -2)
@@ -408,14 +467,25 @@ export class FlappyGame {
     ctx.closePath()
     ctx.fill()
 
+    ctx.fillStyle = '#2f1b10'
+    ctx.fillRect(-8, -20, 18, 4)
+    ctx.fillRect(-3, -28, 9, 9)
+
+    ctx.strokeStyle = 'rgba(56, 30, 15, 0.65)'
+    ctx.lineWidth = 1.5
+    ctx.beginPath()
+    ctx.moveTo(-16, -1)
+    ctx.quadraticCurveTo(-22, 5, -20, 14)
+    ctx.stroke()
+
     ctx.restore()
   }
 
   private drawOverlay() {
     const ctx = this.ctx
 
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.18)'
-    ctx.font = '700 56px Trebuchet MS, Avenir Next, sans-serif'
+    ctx.fillStyle = 'rgba(58, 34, 17, 0.2)'
+    ctx.font = '700 56px Georgia, Times New Roman, serif'
     ctx.textAlign = 'center'
     ctx.fillText(String(this.score), WORLD_WIDTH / 2, 104)
 
@@ -423,29 +493,64 @@ export class FlappyGame {
       return
     }
 
-    ctx.fillStyle = 'rgba(12, 36, 52, 0.72)'
+    ctx.fillStyle = 'rgba(74, 46, 24, 0.78)'
     this.roundRect(38, 208, WORLD_WIDTH - 76, 184, 28)
     ctx.fill()
 
-    ctx.fillStyle = '#fef6dc'
-    ctx.font = '700 28px Trebuchet MS, Avenir Next, sans-serif'
-    ctx.fillText(this.state === 'ready' ? 'Tap To Fly' : 'Crash Landing', WORLD_WIDTH / 2, 268)
+    ctx.strokeStyle = 'rgba(235, 213, 176, 0.4)'
+    ctx.lineWidth = 1
+    this.roundRect(46, 216, WORLD_WIDTH - 92, 168, 22)
+    ctx.stroke()
 
-    ctx.font = '500 17px Verdana, Geneva, sans-serif'
-    ctx.fillStyle = '#dff4ff'
+    ctx.fillStyle = '#f4dfb5'
+    ctx.font = '700 28px Georgia, Times New Roman, serif'
+    ctx.fillText(this.state === 'ready' ? 'Take Wing' : 'Hard Landing', WORLD_WIDTH / 2, 268)
+
+    ctx.font = '500 17px Georgia, Times New Roman, serif'
+    ctx.fillStyle = '#ead8b5'
     const detail =
       this.state === 'ready'
-        ? 'Keep the bird above the ground and between every pipe gap.'
-        : `Score ${this.score}. Best ${this.bestScore}. Tap to try another run.`
+        ? 'Keep the bird above the dust and through each timber opening.'
+        : `Score ${this.score}. Best ${this.bestScore}. Tap to ride again.`
     ctx.fillText(detail, WORLD_WIDTH / 2, 314, WORLD_WIDTH - 124)
 
-    ctx.font = '600 16px Verdana, Geneva, sans-serif'
-    ctx.fillStyle = '#ffe49a'
+    ctx.font = '600 16px Georgia, Times New Roman, serif'
+    ctx.fillStyle = '#f1c988'
     ctx.fillText(
-      this.state === 'ready' ? 'Touch, click, or press Space' : 'Restart unlocks in a moment',
+      this.state === 'ready' ? 'Touch, click, or press Space' : 'Restart unlocks after a beat',
       WORLD_WIDTH / 2,
       352,
     )
+  }
+
+  private drawPlateTexture() {
+    const ctx = this.ctx
+
+    const vignette = ctx.createRadialGradient(
+      WORLD_WIDTH / 2,
+      WORLD_HEIGHT / 2,
+      WORLD_HEIGHT * 0.18,
+      WORLD_WIDTH / 2,
+      WORLD_HEIGHT / 2,
+      WORLD_HEIGHT * 0.72,
+    )
+    vignette.addColorStop(0, 'rgba(0, 0, 0, 0)')
+    vignette.addColorStop(1, 'rgba(54, 33, 20, 0.26)')
+    ctx.fillStyle = vignette
+    ctx.fillRect(0, 0, WORLD_WIDTH, WORLD_HEIGHT)
+
+    ctx.fillStyle = 'rgba(255, 244, 219, 0.06)'
+    for (let index = 0; index < 7; index += 1) {
+      const x = 18 + index * 58 + Math.sin(this.elapsed + index) * 2
+      ctx.fillRect(x, 24, 1, WORLD_HEIGHT - 48)
+    }
+
+    ctx.strokeStyle = 'rgba(72, 44, 25, 0.12)'
+    ctx.lineWidth = 1
+    ctx.beginPath()
+    ctx.moveTo(26, 120)
+    ctx.quadraticCurveTo(48, 290, 30, 482)
+    ctx.stroke()
   }
 
   private roundRect(x: number, y: number, width: number, height: number, radius: number) {

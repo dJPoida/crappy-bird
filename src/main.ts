@@ -4,11 +4,11 @@ import { FlappyGame } from './game'
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
   <main class="page-shell">
     <section class="hero-copy">
-      <p class="eyebrow">TypeScript canvas game</p>
+      <p class="eyebrow">Tintype arcade</p>
       <h1>Crappy Bird</h1>
       <p class="lede">
-        Tap the playfield to flap, weave through the pipes, and chase a best score that stays
-        saved on your device.
+        A sun-baked little flyer trapped inside an old frontier photograph. Tap the playfield,
+        dodge the timber gauntlet, and chase a best score that stays saved on your device.
       </p>
     </section>
 
@@ -48,9 +48,9 @@ const bestScoreEl = document.querySelector<HTMLElement>('#best-score')!
 const statusEl = document.querySelector<HTMLElement>('#status')!
 
 const statusByState = {
-  ready: 'Tap anywhere to start your run.',
-  playing: 'Stay centered and thread the gaps.',
-  gameover: 'Tap again to restart after a crash.',
+  ready: 'Tap anywhere to stir the dust.',
+  playing: 'Hold your line through the timber gaps.',
+  gameover: 'Tap again when the dust settles.',
 } as const
 
 const game = new FlappyGame({
