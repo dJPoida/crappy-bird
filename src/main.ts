@@ -135,7 +135,8 @@ const triggerFlap = (event: Event) => {
 }
 
 shell.addEventListener('pointerdown', triggerFlap)
-shell.addEventListener('contextmenu', (event) => event.preventDefault())
+document.addEventListener('contextmenu', (event) => event.preventDefault())
+document.addEventListener('touchmove', (event) => event.preventDefault(), { passive: false })
 exitImmersiveButton.addEventListener('pointerdown', (event) => {
   event.preventDefault()
   event.stopPropagation()
