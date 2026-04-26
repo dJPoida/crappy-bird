@@ -102,6 +102,8 @@ h1 {
   box-shadow: var(--shadow);
   user-select: none;
   position: relative;
+  display: grid;
+  gap: 12px;
 }
 
 .game-card::before {
@@ -147,7 +149,6 @@ h1 {
   width: 100%;
   aspect-ratio: 7 / 12;
   display: block;
-  margin: 14px 0 12px;
   border-radius: 20px;
   border: 8px solid #6a4429;
   outline: 1px solid rgba(255, 242, 219, 0.45);
@@ -155,6 +156,30 @@ h1 {
     inset 0 0 0 2px rgba(249, 233, 204, 0.22),
     0 16px 34px rgba(62, 39, 23, 0.24);
   background: linear-gradient(180deg, #d0b081 0%, #6d4a2e 100%);
+}
+
+.playfield-stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 0;
+}
+
+.exit-immersive {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
+  display: none;
+  border: 1px solid rgba(108, 74, 44, 0.24);
+  background: rgba(243, 224, 189, 0.92);
+  color: #4f2e19;
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .status-line {
@@ -211,6 +236,76 @@ h1 {
   font-size: 0.94rem;
 }
 
+body.immersive-play {
+  overflow: hidden;
+}
+
+body.immersive-play .page-shell {
+  width: 100%;
+  max-width: none;
+  min-height: 100svh;
+  padding: 0;
+  gap: 0;
+  display: block;
+}
+
+body.immersive-play .hero-copy {
+  display: none;
+}
+
+body.immersive-play .game-card {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  width: 100vw;
+  height: 100svh;
+  border-radius: 0;
+  border: 0;
+  padding:
+    max(12px, env(safe-area-inset-top))
+    max(12px, env(safe-area-inset-right))
+    max(12px, env(safe-area-inset-bottom))
+    max(12px, env(safe-area-inset-left));
+  background:
+    linear-gradient(180deg, rgba(244, 230, 201, 0.97), rgba(222, 194, 149, 0.97)),
+    repeating-linear-gradient(
+      0deg,
+      rgba(117, 80, 43, 0.04) 0,
+      rgba(117, 80, 43, 0.04) 2px,
+      transparent 2px,
+      transparent 7px
+    );
+  grid-template-rows: auto auto auto 1fr;
+  align-items: stretch;
+}
+
+body.immersive-play .game-card::before {
+  inset: 0;
+  border-radius: 0;
+}
+
+body.immersive-play .playfield-stage {
+  min-height: 0;
+  height: 100%;
+}
+
+body.immersive-play .game-canvas {
+  width: auto;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+body.immersive-play .exit-immersive {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+body.immersive-play .meta-row {
+  display: none;
+}
+
 @media (min-width: 860px) {
   .page-shell {
     grid-template-columns: minmax(240px, 1fr) minmax(320px, 430px);
@@ -245,5 +340,15 @@ h1 {
   .score-pill {
     min-width: 0;
     flex: 1 1 0;
+  }
+}
+
+@media (max-width: 640px) {
+  body.immersive-play .game-card {
+    gap: 10px;
+  }
+
+  body.immersive-play .score-pill strong {
+    font-size: 1.32rem;
   }
 }

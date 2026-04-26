@@ -24,12 +24,15 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
         </div>
       </div>
 
-      <canvas
-        id="game"
-        class="game-canvas"
-        aria-label="Crappy Bird playable canvas"
-        role="img"
-      ></canvas>
+      <div class="playfield-stage">
+        <button id="exit-immersive" class="exit-immersive" type="button">Leave Frame</button>
+        <canvas
+          id="game"
+          class="game-canvas"
+          aria-label="Crappy Bird playable canvas"
+          role="img"
+        ></canvas>
+      </div>
 
       <p id="status" class="status-line">Tap anywhere to start your run.</p>
 
@@ -58,12 +61,50 @@ const bestScoreEl = document.querySelector<HTMLElement>('#best-score')!
 const statusEl = document.querySelector<HTMLElement>('#status')!
 const difficultyLabelEl = document.querySelector<HTMLElement>('#difficulty-label')!
 const difficultyFillEl = document.querySelector<HTMLElement>('#difficulty-fill')!
+const exitImmersiveButton = document.querySelector<HTMLButtonElement>('#exit-immersive')!
 
 const statusByState = {
   ready: 'Tap anywhere to stir the dust.',
   playing: 'Hold your line through the timber gaps.',
   gameover: 'Tap again when the dust settles.',
 } as const
+
+let gameState: keyof typeof statusByState = 'ready'
+let immersiveMode = false
+
+const syncImmersiveMode = () => {
+  document.body.classList.toggle('immersive-play', immersiveMode)
+}
+
+const enterImmersiveMode = async () => {
+  if (immersiveMode) {
+    return
+  }
+
+  immersiveMode = true
+  syncImmersiveMode()
+
+  if (document.fullscreenEnabled && !document.fullscreenElement) {
+    try {
+      await shell.requestFullscreen()
+    } catch {
+      // The fixed viewport fallback is already active.
+    }
+  }
+}
+
+const exitImmersiveMode = async () => {
+  immersiveMode = false
+  syncImmersiveMode()
+
+  if (document.fullscreenElement) {
+    try {
+      await document.exitFullscreen()
+    } catch {
+      // Ignore exit failures and keep the layout fallback in sync.
+    }
+  }
+}
 
 const game = new FlappyGame({
   canvas,
@@ -78,22 +119,53 @@ const game = new FlappyGame({
     difficultyFillEl.style.width = `${Math.round(progress * 100)}%`
   },
   onStateChange(state) {
+    gameState = state
     statusEl.textContent = statusByState[state]
   },
 })
 
 const triggerFlap = (event: Event) => {
   event.preventDefault()
+
+  if (gameState === 'ready') {
+    void enterImmersiveMode()
+  }
+
   game.handleTap()
 }
 
 shell.addEventListener('pointerdown', triggerFlap)
 shell.addEventListener('contextmenu', (event) => event.preventDefault())
+exitImmersiveButton.addEventListener('pointerdown', (event) => {
+  event.preventDefault()
+  event.stopPropagation()
+})
+exitImmersiveButton.addEventListener('click', (event) => {
+  event.preventDefault()
+  event.stopPropagation()
+  void exitImmersiveMode()
+})
 
 window.addEventListener('keydown', (event) => {
   if (event.code === 'Space' || event.code === 'ArrowUp' || event.code === 'KeyW') {
     event.preventDefault()
+
+    if (gameState === 'ready') {
+      void enterImmersiveMode()
+    }
+
     game.handleTap()
+  }
+
+  if (event.code === 'Escape' && immersiveMode) {
+    event.preventDefault()
+    void exitImmersiveMode()
+  }
+})
+
+document.addEventListener('fullscreenchange', () => {
+  if (!document.fullscreenElement && immersiveMode) {
+    syncImmersiveMode()
   }
 })
 
