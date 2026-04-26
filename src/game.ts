@@ -28,16 +28,21 @@ const WORLD_HEIGHT = 720
 const GROUND_HEIGHT = 110
 const PIPE_WIDTH = 86
 const PIPE_GAP = 176
+const MIN_PIPE_GAP = 148
 const PIPE_SPEED = 188
+const MAX_PIPE_SPEED = 226
 const PIPE_INTERVAL = 1.38
+const MIN_PIPE_INTERVAL = 1.18
 const GRAVITY = 1380
 const FLAP_FORCE = -390
 const MAX_FALL_SPEED = 630
 const PIPE_MARGIN = 96
 const TOP_MARGIN = 82
 const RESTART_LOCK = 0.45
+const DIFFICULTY_FULL_AT_SCORE = 22
 
 const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value))
+const lerp = (start: number, end: number, amount: number) => start + (end - start) * amount
 
 const intersectsCircleRect = (
   cx: number,
@@ -146,7 +151,9 @@ export class FlappyGame {
   }
 
   private update(delta: number) {
-    this.groundOffset = (this.groundOffset + PIPE_SPEED * delta) % 48
+    const pipeSpeed = this.currentPipeSpeed()
+
+    this.groundOffset = (this.groundOffset + pipeSpeed * delta) % 48
 
     if (this.state === 'ready') {
       this.bird.y = WORLD_HEIGHT * 0.42 + Math.sin(this.elapsed * 3.2) * 10
@@ -165,11 +172,11 @@ export class FlappyGame {
 
     if (this.state === 'playing' && this.spawnTimer <= 0) {
       this.spawnPipe()
-      this.spawnTimer += PIPE_INTERVAL
+      this.spawnTimer += this.currentSpawnInterval()
     }
 
     for (const pipe of this.pipes) {
-      pipe.x -= PIPE_SPEED * delta
+      pipe.x -= pipeSpeed * delta
 
       if (!pipe.passed && pipe.x + pipe.width < this.bird.x) {
         pipe.passed = true
@@ -229,17 +236,36 @@ export class FlappyGame {
   }
 
   private spawnPipe() {
-    const minGapY = TOP_MARGIN + PIPE_GAP / 2
-    const maxGapY = WORLD_HEIGHT - GROUND_HEIGHT - PIPE_MARGIN - PIPE_GAP / 2
+    const gapHeight = this.currentPipeGap()
+    const minGapY = TOP_MARGIN + gapHeight / 2
+    const maxGapY = WORLD_HEIGHT - GROUND_HEIGHT - PIPE_MARGIN - gapHeight / 2
     const gapY = minGapY + Math.random() * (maxGapY - minGapY)
 
     this.pipes.push({
       x: WORLD_WIDTH + 24,
       width: PIPE_WIDTH,
       gapY,
-      gapHeight: PIPE_GAP,
+      gapHeight,
       passed: false,
     })
+  }
+
+  private currentDifficultyProgress() {
+    const normalized = clamp(this.score / DIFFICULTY_FULL_AT_SCORE, 0, 1)
+    // Smootherstep keeps the opening stretch approachable, then ramps gently.
+    return normalized * normalized * (3 - 2 * normalized)
+  }
+
+  private currentPipeGap() {
+    return lerp(PIPE_GAP, MIN_PIPE_GAP, this.currentDifficultyProgress())
+  }
+
+  private currentPipeSpeed() {
+    return lerp(PIPE_SPEED, MAX_PIPE_SPEED, this.currentDifficultyProgress())
+  }
+
+  private currentSpawnInterval() {
+    return lerp(PIPE_INTERVAL, MIN_PIPE_INTERVAL, this.currentDifficultyProgress())
   }
 
   private draw() {
