@@ -4,6 +4,7 @@ type GameCallbacks = {
   canvas: HTMLCanvasElement
   onScoreChange: (score: number) => void
   onBestScoreChange: (bestScore: number) => void
+  onDifficultyChange: (progress: number, label: string) => void
   onStateChange: (state: GameState) => void
 }
 
@@ -27,19 +28,21 @@ const WORLD_WIDTH = 420
 const WORLD_HEIGHT = 720
 const GROUND_HEIGHT = 110
 const PIPE_WIDTH = 86
+const MAX_PIPE_WIDTH = 100
 const PIPE_GAP = 176
-const MIN_PIPE_GAP = 148
+const MIN_PIPE_GAP = 138
 const PIPE_SPEED = 188
-const MAX_PIPE_SPEED = 226
+const MAX_PIPE_SPEED = 246
 const PIPE_INTERVAL = 1.38
-const MIN_PIPE_INTERVAL = 1.18
+const MIN_PIPE_INTERVAL = 1.08
 const GRAVITY = 1380
 const FLAP_FORCE = -390
 const MAX_FALL_SPEED = 630
 const PIPE_MARGIN = 96
 const TOP_MARGIN = 82
 const RESTART_LOCK = 0.45
-const DIFFICULTY_FULL_AT_SCORE = 22
+const DIFFICULTY_FULL_AT_SCORE = 16
+const DIFFICULTY_LABELS = ['Quiet', 'Dusty', 'Restless', 'Rough', 'Outlaw'] as const
 
 const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value))
 const lerp = (start: number, end: number, amount: number) => start + (end - start) * amount
@@ -65,6 +68,7 @@ export class FlappyGame {
   private readonly ctx: CanvasRenderingContext2D
   private readonly onScoreChange: GameCallbacks['onScoreChange']
   private readonly onBestScoreChange: GameCallbacks['onBestScoreChange']
+  private readonly onDifficultyChange: GameCallbacks['onDifficultyChange']
   private readonly onStateChange: GameCallbacks['onStateChange']
 
   private lastFrameTime = 0
@@ -83,7 +87,13 @@ export class FlappyGame {
   }
   private pipes: Pipe[] = []
 
-  constructor({ canvas, onScoreChange, onBestScoreChange, onStateChange }: GameCallbacks) {
+  constructor({
+    canvas,
+    onScoreChange,
+    onBestScoreChange,
+    onDifficultyChange,
+    onStateChange,
+  }: GameCallbacks) {
     const context = canvas.getContext('2d')
 
     if (!context) {
@@ -94,6 +104,7 @@ export class FlappyGame {
     this.ctx = context
     this.onScoreChange = onScoreChange
     this.onBestScoreChange = onBestScoreChange
+    this.onDifficultyChange = onDifficultyChange
     this.onStateChange = onStateChange
     this.bestScore = this.readBestScore()
     this.syncUi()
@@ -187,6 +198,7 @@ export class FlappyGame {
           this.onBestScoreChange(this.bestScore)
         }
         this.onScoreChange(this.score)
+        this.onDifficultyChange(this.currentDifficultyProgress(), this.currentDifficultyLabel())
       }
     }
 
@@ -243,7 +255,7 @@ export class FlappyGame {
 
     this.pipes.push({
       x: WORLD_WIDTH + 24,
-      width: PIPE_WIDTH,
+      width: this.currentPipeWidth(),
       gapY,
       gapHeight,
       passed: false,
@@ -260,12 +272,24 @@ export class FlappyGame {
     return lerp(PIPE_GAP, MIN_PIPE_GAP, this.currentDifficultyProgress())
   }
 
+  private currentPipeWidth() {
+    return lerp(PIPE_WIDTH, MAX_PIPE_WIDTH, this.currentDifficultyProgress())
+  }
+
   private currentPipeSpeed() {
     return lerp(PIPE_SPEED, MAX_PIPE_SPEED, this.currentDifficultyProgress())
   }
 
   private currentSpawnInterval() {
     return lerp(PIPE_INTERVAL, MIN_PIPE_INTERVAL, this.currentDifficultyProgress())
+  }
+
+  private currentDifficultyLabel() {
+    const index = Math.min(
+      DIFFICULTY_LABELS.length - 1,
+      Math.floor(this.currentDifficultyProgress() * DIFFICULTY_LABELS.length),
+    )
+    return DIFFICULTY_LABELS[index]
   }
 
   private draw() {
@@ -282,6 +306,7 @@ export class FlappyGame {
   }
 
   private drawSky() {
+    const difficulty = this.currentDifficultyProgress()
     const gradient = this.ctx.createLinearGradient(0, 0, 0, WORLD_HEIGHT)
     gradient.addColorStop(0, '#efdcb8')
     gradient.addColorStop(0.45, '#d2b07d')
@@ -294,16 +319,17 @@ export class FlappyGame {
     this.ctx.arc(WORLD_WIDTH - 84, 106, 54, 0, Math.PI * 2)
     this.ctx.fill()
 
-    this.ctx.fillStyle = 'rgba(95, 60, 31, 0.1)'
+    this.ctx.fillStyle = `rgba(95, 60, 31, ${0.1 + difficulty * 0.08})`
     this.ctx.fillRect(0, 0, WORLD_WIDTH, WORLD_HEIGHT)
   }
 
   private drawBackdrop() {
     const ctx = this.ctx
+    const difficulty = this.currentDifficultyProgress()
     const haze = Math.sin(this.elapsed * 0.35) * 5
 
-    ctx.fillStyle = 'rgba(245, 229, 198, 0.2)'
-    ctx.fillRect(0, 148 + haze, WORLD_WIDTH, 48)
+    ctx.fillStyle = `rgba(245, 229, 198, ${0.18 + difficulty * 0.12})`
+    ctx.fillRect(0, 148 + haze, WORLD_WIDTH, 48 + difficulty * 18)
 
     ctx.fillStyle = '#7d5a3a'
     ctx.beginPath()
@@ -424,6 +450,7 @@ export class FlappyGame {
   private drawGround() {
     const ctx = this.ctx
     const groundY = WORLD_HEIGHT - GROUND_HEIGHT
+    const difficulty = this.currentDifficultyProgress()
 
     ctx.fillStyle = '#9f7448'
     ctx.fillRect(0, groundY, WORLD_WIDTH, GROUND_HEIGHT)
@@ -449,6 +476,9 @@ export class FlappyGame {
 
     ctx.fillStyle = '#6c492c'
     ctx.fillRect(0, groundY - 14, WORLD_WIDTH, 14)
+
+    ctx.fillStyle = `rgba(86, 56, 31, ${difficulty * 0.16})`
+    ctx.fillRect(0, groundY - 40, WORLD_WIDTH, 40)
   }
 
   private drawBird() {
@@ -551,6 +581,7 @@ export class FlappyGame {
 
   private drawPlateTexture() {
     const ctx = this.ctx
+    const difficulty = this.currentDifficultyProgress()
 
     const vignette = ctx.createRadialGradient(
       WORLD_WIDTH / 2,
@@ -561,7 +592,7 @@ export class FlappyGame {
       WORLD_HEIGHT * 0.72,
     )
     vignette.addColorStop(0, 'rgba(0, 0, 0, 0)')
-    vignette.addColorStop(1, 'rgba(54, 33, 20, 0.26)')
+    vignette.addColorStop(1, `rgba(54, 33, 20, ${0.26 + difficulty * 0.12})`)
     ctx.fillStyle = vignette
     ctx.fillRect(0, 0, WORLD_WIDTH, WORLD_HEIGHT)
 
@@ -570,6 +601,9 @@ export class FlappyGame {
       const x = 18 + index * 58 + Math.sin(this.elapsed + index) * 2
       ctx.fillRect(x, 24, 1, WORLD_HEIGHT - 48)
     }
+
+    ctx.fillStyle = `rgba(123, 84, 50, ${difficulty * 0.08})`
+    ctx.fillRect(0, WORLD_HEIGHT * 0.18, WORLD_WIDTH, WORLD_HEIGHT * 0.52)
 
     ctx.strokeStyle = 'rgba(72, 44, 25, 0.12)'
     ctx.lineWidth = 1
@@ -620,6 +654,7 @@ export class FlappyGame {
   private syncUi() {
     this.onScoreChange(this.score)
     this.onBestScoreChange(this.bestScore)
+    this.onDifficultyChange(this.currentDifficultyProgress(), this.currentDifficultyLabel())
     this.onStateChange(this.state)
   }
 }

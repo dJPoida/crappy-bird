@@ -164,6 +164,47 @@ h1 {
   font-weight: 700;
 }
 
+.trail-meter {
+  margin-top: 12px;
+  display: grid;
+  gap: 8px;
+}
+
+.trail-meter-copy {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: rgba(76, 46, 24, 0.84);
+}
+
+.trail-meter-copy span {
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.trail-meter-copy strong {
+  font-size: 0.95rem;
+  color: #5a351a;
+}
+
+.trail-track {
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(105, 67, 36, 0.14);
+  overflow: hidden;
+  border: 1px solid rgba(108, 74, 44, 0.12);
+}
+
+.trail-fill {
+  width: 0%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #8f6843 0%, #6f3f1d 100%);
+  transition: width 220ms ease;
+}
+
 .meta-row {
   margin-top: 12px;
   color: rgba(76, 46, 24, 0.76);

@@ -33,6 +33,16 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
 
       <p id="status" class="status-line">Tap anywhere to start your run.</p>
 
+      <div class="trail-meter" aria-label="Current difficulty">
+        <div class="trail-meter-copy">
+          <span>Trail</span>
+          <strong id="difficulty-label">Quiet</strong>
+        </div>
+        <div class="trail-track">
+          <div id="difficulty-fill" class="trail-fill"></div>
+        </div>
+      </div>
+
       <div class="meta-row">
         <span>Tap / Click / Space</span>
         <span>Ready for GitHub and Vercel</span>
@@ -46,6 +56,8 @@ const shell = document.querySelector<HTMLElement>('#game-shell')!
 const scoreEl = document.querySelector<HTMLElement>('#score')!
 const bestScoreEl = document.querySelector<HTMLElement>('#best-score')!
 const statusEl = document.querySelector<HTMLElement>('#status')!
+const difficultyLabelEl = document.querySelector<HTMLElement>('#difficulty-label')!
+const difficultyFillEl = document.querySelector<HTMLElement>('#difficulty-fill')!
 
 const statusByState = {
   ready: 'Tap anywhere to stir the dust.',
@@ -60,6 +72,10 @@ const game = new FlappyGame({
   },
   onBestScoreChange(bestScore) {
     bestScoreEl.textContent = String(bestScore)
+  },
+  onDifficultyChange(progress, label) {
+    difficultyLabelEl.textContent = label
+    difficultyFillEl.style.width = `${Math.round(progress * 100)}%`
   },
   onStateChange(state) {
     statusEl.textContent = statusByState[state]
