@@ -278,7 +278,7 @@ body.immersive-play .game-card {
       transparent 2px,
       transparent 7px
     );
-  grid-template-rows: auto auto auto 1fr;
+  grid-template-rows: auto 1fr auto auto;
   align-items: stretch;
 }
 
@@ -289,14 +289,14 @@ body.immersive-play .game-card::before {
 
 body.immersive-play .playfield-stage {
   min-height: 0;
-  height: 100%;
+  overflow: hidden;
 }
 
 body.immersive-play .game-canvas {
-  width: auto;
-  height: 100%;
-  max-width: 100%;
-  max-height: 100%;
+  border-width: 0;
+  border-radius: 0;
+  outline: none;
+  box-shadow: none;
 }
 
 body.immersive-play .exit-immersive {

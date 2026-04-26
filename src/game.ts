@@ -629,10 +629,33 @@ export class FlappyGame {
   }
 
   private resizeCanvas = () => {
-    const rect = this.canvas.getBoundingClientRect()
+    const parent = this.canvas.parentElement!
+    const parentRect = parent.getBoundingClientRect()
     const ratio = Math.max(window.devicePixelRatio || 1, 1)
-    this.canvas.width = Math.floor(rect.width * ratio)
-    this.canvas.height = Math.floor(rect.height * ratio)
+
+    const containerW = parentRect.width
+    const containerH = parentRect.height
+    const gameAspect = WORLD_WIDTH / WORLD_HEIGHT
+
+    let cssW: number
+    let cssH: number
+
+    if (containerH <= 0 || containerW / containerH < gameAspect) {
+      cssW = containerW
+      cssH = containerW / gameAspect
+    } else {
+      cssH = containerH
+      cssW = containerH * gameAspect
+    }
+
+    this.canvas.style.width = `${cssW}px`
+    this.canvas.style.height = `${cssH}px`
+
+    const contentW = this.canvas.clientWidth
+    const contentH = this.canvas.clientHeight
+
+    this.canvas.width = Math.floor(contentW * ratio)
+    this.canvas.height = Math.floor(contentH * ratio)
 
     const scaleX = this.canvas.width / WORLD_WIDTH
     const scaleY = this.canvas.height / WORLD_HEIGHT
